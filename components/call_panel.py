@@ -1,14 +1,17 @@
 import streamlit as st
+from components.html import render_html
 
-def render_call_panel():
+def render_call_panel(live_mode=False, case_card=None, on_command=None):
     """
     Renders the Left Panel — Active Call card, voice visualizer, actions, audio quality & language breakdown.
     """
-    call_status = st.session_state.get("call_status", "LIVE CALL")
-    speaker_state = st.session_state.get("speaker_state", "Listening for caller...")
-    call_duration = st.session_state.get("call_duration", "04:37")
+    call_status = (case_card or {}).get("status", "SESSION CREATED").upper() if live_mode else st.session_state.get("call_status", "LIVE CALL")
+    speaker_state = "Voice not available in Phase 4" if live_mode else st.session_state.get("speaker_state", "Listening for caller...")
+    call_duration = "--:--" if live_mode else st.session_state.get("call_duration", "04:37")
     is_muted = st.session_state.get("is_muted", False)
-    assigned_human = st.session_state.get("assigned_human", "Support Specialist")
+    assigned_human = ((case_card or {}).get("routing") or {}).get("assigned_agent") or "Unassigned" if live_mode else st.session_state.get("assigned_human", "Support Specialist")
+    caller = ((case_card or {}).get("caller") or {}).get("phone_masked") or "Not provided" if live_mode else "+91 98765-XXXXX"
+    language = ((case_card or {}).get("language") or {}).get("primary") or "Not detected" if live_mode else "Hindi + English"
 
     is_human_connected = call_status == "TRANSFERRED_TO_HUMAN"
     
@@ -32,7 +35,7 @@ def render_call_panel():
 
     status_badge_color = "#EF4444" if call_status == "LIVE CALL" else "#10B981"
 
-    st.markdown(f"""
+    render_html(f"""
     <div class="saas-card">
         <div class="card-title-bar">
             <span class="card-title">
@@ -47,11 +50,11 @@ def render_call_panel():
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Caller ID</div>
-                    <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">Unknown Caller (+91 98765-XXXXX)</div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">{caller}</div>
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Mode</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #C084FC; margin-top: 2px;">Hindi + English</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #C084FC; margin-top: 2px;">{language}</div>
                 </div>
             </div>
             {f'<div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #10B981; font-weight: 600;">🎧 Connected Agent: {assigned_human}</div>' if is_human_connected else ''}
@@ -81,20 +84,23 @@ def render_call_panel():
             <span style="color: {status_color};">{speaker_state}</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # CALL CONTROL BUTTONS
     c1, c2 = st.columns(2)
     with c1:
         mute_label = "🔇 Muted" if is_muted else "🎙️ Mute"
-        if st.button(mute_label, key="btn_mute", use_container_width=True, type="secondary"):
+        if st.button(mute_label, key="btn_mute", use_container_width=True, type="secondary", disabled=live_mode):
             st.session_state["is_muted"] = not is_muted
             st.rerun()
 
     with c2:
         if st.button("🔴 End Call", key="btn_end", use_container_width=True, type="secondary"):
-            st.session_state["call_status"] = "ENDED"
-            st.session_state["speaker_state"] = "Call Ended"
+            if live_mode and on_command:
+                on_command("end_session", {})
+            else:
+                st.session_state["call_status"] = "ENDED"
+                st.session_state["speaker_state"] = "Call Ended"
             st.rerun()
 
     # PRIMARY ACTION BUTTON: TRANSFER TO HUMAN
@@ -105,8 +111,12 @@ def render_call_panel():
     else:
         st.success("✓ Call Handed Off to Support Specialist", icon="🎧")
 
+    if live_mode:
+        st.info("Audio and voice capabilities are not available until a later phase.")
+        return
+
     # CARD: AUDIO QUALITY & NOISE RESILIENCE
-    st.markdown("""
+    render_html("""
     <div class="saas-card" style="margin-top: 14px; padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🔊</span> Audio Quality & Noise Resilience
@@ -130,12 +140,12 @@ def render_call_panel():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # CARD: LANGUAGE DETECTION BREAKDOWN
     hi_pct = st.session_state.get("lang_hi", 62)
     en_pct = st.session_state.get("lang_en", 38)
-    st.markdown(f"""
+    render_html(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🌐</span> Real-Time Language Detection
@@ -153,4 +163,4 @@ def render_call_panel():
             <span style="background: rgba(139, 92, 246, 0.2); color: #C084FC; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Code-Switched (Hinglish)</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)

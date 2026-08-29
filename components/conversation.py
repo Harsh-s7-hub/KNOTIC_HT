@@ -1,12 +1,25 @@
-import streamlit as st
+from html import escape
 
-def render_conversation_panel():
+import streamlit as st
+from components.html import render_html
+
+
+def escape_timeline_item(item):
+    """Return a display-safe copy of untrusted transcript/event data."""
+    safe = dict(item)
+    for key in ("text", "time", "lang", "name", "icon"):
+        safe[key] = escape(str(item.get(key, "")), quote=True)
+    safe["role"] = escape(str(item.get("role", "caller")), quote=True)
+    safe["type"] = escape(str(item.get("type", "message")), quote=True)
+    return safe
+
+def render_conversation_panel(timeline=None):
     """
     Renders the Center Panel — Live Conversation timeline with chat bubbles and pipeline events.
     """
-    timeline = st.session_state.get("conversation_history", [])
+    timeline = st.session_state.get("conversation_history", []) if timeline is None else timeline
     
-    st.markdown("""
+    render_html("""
     <div class="saas-card" style="height: 100%; min-height: 680px; display: flex; flex-direction: column;">
         <div class="card-title-bar">
             <span class="card-title">
@@ -17,18 +30,19 @@ def render_conversation_panel():
             </span>
         </div>
         <div class="conversation-timeline">
-    """, unsafe_allow_html=True)
+    """)
 
     if not timeline:
-        st.markdown("""
+        render_html("""
         <div style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
             <div style="font-size: 32px; margin-bottom: 8px;">🎙️</div>
             <div>Waiting for incoming speech...</div>
             <div style="font-size: 12px; margin-top: 4px;">Click "Start Demo" or step forward to simulate conversation.</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
-    for item in timeline:
+    for raw_item in timeline:
+        item = escape_timeline_item(raw_item)
         item_type = item.get("type", "message")
         
         if item_type == "event":
@@ -36,21 +50,21 @@ def render_conversation_panel():
             event_icon = item.get("icon", "⚡")
             event_time = item.get("time", "")
             
-            st.markdown(f"""
+            render_html(f"""
             <div class="pipeline-node">
                 <span class="pipeline-dot"></span>
                 <span>{event_icon}</span>
                 <span style="flex-grow: 1;">{event_text}</span>
                 <span style="font-size: 10px; opacity: 0.7;">{event_time}</span>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
         elif item_type == "interruption":
-            st.markdown(f"""
+            render_html(f"""
             <div style="align-self: center; background: rgba(239, 68, 68, 0.15); border: 1px dashed rgba(239, 68, 68, 0.4); color: #FCA5A5; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin: 4px 0;">
                 ⚠️ Caller Interrupted • Latency Compensated (80ms)
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
         elif item_type == "message":
             role = item.get("role", "caller")
@@ -67,7 +81,7 @@ def render_conversation_panel():
                 lang_badge = '<span class="lang-badge lang-badge-cs">HI+EN</span>'
 
             if role == "caller":
-                st.markdown(f"""
+                render_html(f"""
                 <div class="chat-bubble-caller">
                     <div class="bubble-meta">
                         <span class="bubble-author" style="color: #60A5FA;">👤 CALLER</span>
@@ -78,10 +92,10 @@ def render_conversation_panel():
                     </div>
                     <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
             elif role == "ai":
-                st.markdown(f"""
+                render_html(f"""
                 <div class="chat-bubble-ai">
                     <div class="bubble-meta">
                         <span class="bubble-author" style="color: #A5B4FC;">🤖 AI AGENT</span>
@@ -92,10 +106,10 @@ def render_conversation_panel():
                     </div>
                     <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 
             elif role == "human":
-                st.markdown(f"""
+                render_html(f"""
                 <div class="chat-bubble-ai" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 95, 70, 0.3) 100%); border-color: rgba(16, 185, 129, 0.4);">
                     <div class="bubble-meta">
                         <span class="bubble-author" style="color: #6EE7B7;">🎧 HUMAN AGENT (Support Specialist)</span>
@@ -103,9 +117,9 @@ def render_conversation_panel():
                     </div>
                     <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
-    st.markdown("""
+    render_html("""
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)

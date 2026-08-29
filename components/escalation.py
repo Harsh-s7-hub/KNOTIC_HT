@@ -1,14 +1,44 @@
 import streamlit as st
+from components.html import render_html
 
-def render_escalation_modal():
+def render_escalation_modal(live_mode=False, case_card=None, on_command=None):
     """
     Renders the Human Escalation modal dialog when transfer is requested.
     """
     if not st.session_state.get("show_escalation_modal", False):
         return
 
+    if live_mode:
+        handoff = (case_card or {}).get("handoff") or {}
+        reasons = ", ".join(handoff.get("reason_codes") or []) or "Operator requested"
+        render_html(f"""
+        <div class="saas-card" style="border: 2px solid rgba(239, 68, 68, 0.5);">
+            <div class="card-title">🚨 Human Escalation Request</div>
+            <div style="margin-top: 12px; color: var(--text-secondary);">
+                Current state: <strong>{handoff.get('state') or 'not_requested'}</strong><br>
+                Reason: <strong>{reasons}</strong><br>
+                Actual human-agent connection is not available in Phase 4.
+            </div>
+        </div>
+        """)
+        left, right = st.columns(2)
+        with left:
+            if st.button("❌ Cancel Escalation", key="btn_cancel_esc_live", type="secondary", use_container_width=True):
+                if handoff.get("state") not in (None, "not_requested") and on_command:
+                    on_command("cancel_handoff", {})
+                st.session_state["show_escalation_modal"] = False
+                st.rerun()
+        with right:
+            if st.button("✅ Request Human Support", key="btn_confirm_esc_live", type="primary", use_container_width=True,
+                         disabled=handoff.get("state") not in (None, "not_requested", "cancelled")):
+                if on_command:
+                    on_command("request_handoff", {"reason_code": "operator_requested"})
+                st.session_state["show_escalation_modal"] = False
+                st.rerun()
+        return
+
     # Use Streamlit dialog or custom expander overlay block
-    st.markdown("""
+    render_html("""
     <div style="background: rgba(17, 24, 39, 0.95); border: 2px solid rgba(239, 68, 68, 0.5); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.25);">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -75,16 +105,23 @@ def render_escalation_modal():
             <button id="close_btn" style="display:none;"></button>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("❌ Cancel Escalation", key="btn_cancel_esc", type="secondary", use_container_width=True):
+            if live_mode and on_command and ((case_card or {}).get("handoff") or {}).get("state") not in (None, "not_requested"):
+                on_command("cancel_handoff", {})
             st.session_state["show_escalation_modal"] = False
             st.rerun()
 
     with col2:
         if st.button("✅ Confirm Transfer to Human Agent", key="btn_confirm_esc", type="primary", use_container_width=True):
+            if live_mode:
+                if on_command:
+                    on_command("request_handoff", {"reason_code": "operator_requested"})
+                st.session_state["show_escalation_modal"] = False
+                st.rerun()
             st.session_state["show_escalation_modal"] = False
             st.session_state["call_status"] = "TRANSFERRED_TO_HUMAN"
             st.session_state["speaker_state"] = "Human Agent speaking..."

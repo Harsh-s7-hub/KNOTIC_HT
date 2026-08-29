@@ -1,24 +1,39 @@
 import streamlit as st
+from components.html import render_html
 
-def render_intelligence_panel():
+def render_intelligence_panel(case_card=None):
     """
     Renders the Right Panel — AI Intelligence cards (Intent, Extracted Entities, Confidence Meter, Next Question, AI Safety).
     """
-    intent = st.session_state.get("intent", {"name": "Payment / Order Issue", "confidence": 94})
-    entities = st.session_state.get("entities", [
+    if case_card is not None:
+        problem = case_card.get("problem") or {}
+        intent = {"name": problem.get("subcategory") or problem.get("category") or "Not classified",
+                  "confidence": round(float(problem.get("confidence") or 0) * 100)}
+        entities = [{"key": key, "val": value.get("value") if value.get("value") is not None else "Not provided",
+                     "status": value.get("status", "missing")} for key, value in (case_card.get("fields") or {}).items()]
+        confidence = case_card.get("confidence") or {}
+        overall_confidence = round(float(confidence.get("overall") or 0) * 100)
+        confidence_explanation = confidence.get("explanation") or "No confidence explanation available yet."
+        next_question = case_card.get("next_action")
+        if next_question:
+            next_question = {"text": next_question.get("question") or "No question available",
+                             "reason": next_question.get("reason") or "No reason provided"}
+    else:
+        intent = st.session_state.get("intent", {"name": "Payment / Order Issue", "confidence": 94})
+        entities = st.session_state.get("entities", [
         {"key": "Issue", "val": "Payment deducted", "status": "confirmed"},
         {"key": "Order Status", "val": "Not confirmed", "status": "confirmed"},
         {"key": "Payment Date", "val": "Yesterday", "status": "confirmed"},
         {"key": "Order ID", "val": "73821", "status": "confirmed"},
         {"key": "Transaction ID", "val": "Not provided", "status": "missing"},
-    ])
-    overall_confidence = st.session_state.get("overall_confidence", 87)
-    confidence_explanation = st.session_state.get("confidence_explanation", 
-        "Intent and issue details are well understood. Transaction reference is still missing.")
-    next_question = st.session_state.get("next_question", {
-        "text": "Could you provide your transaction reference number?",
-        "reason": "Required to verify payment with gateway API."
-    })
+        ])
+        overall_confidence = st.session_state.get("overall_confidence", 87)
+        confidence_explanation = st.session_state.get("confidence_explanation", 
+            "Intent and issue details are well understood. Transaction reference is still missing.")
+        next_question = st.session_state.get("next_question", {
+            "text": "Could you provide your transaction reference number?",
+            "reason": "Required to verify payment with gateway API."
+        })
 
     # Confidence state calculation
     if overall_confidence >= 80:
@@ -32,7 +47,7 @@ def render_intelligence_panel():
         conf_status = "Low Confidence • Escalation Recommended"
 
     # CARD 1: DETECTED INTENT
-    st.markdown(f"""
+    render_html(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>🎯</span> Detected Intent
@@ -48,7 +63,7 @@ def render_intelligence_panel():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # CARD 2: EXTRACTED STRUCTURED ENTITIES
     entity_rows_html = ""
@@ -71,7 +86,7 @@ def render_intelligence_panel():
         </div>
         """
 
-    st.markdown(f"""
+    render_html(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🏷️</span> Extracted Information
@@ -80,10 +95,10 @@ def render_intelligence_panel():
             {entity_rows_html}
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # CARD 3: OVERALL CONFIDENCE METER
-    st.markdown(f"""
+    render_html(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>📊</span> Overall Confidence Score
@@ -99,11 +114,11 @@ def render_intelligence_panel():
             💡 <em>"{confidence_explanation}"</em>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # CARD 4: NEXT BEST QUESTION
     if next_question:
-        st.markdown(f"""
+        render_html(f"""
         <div class="saas-card" style="padding: 16px; border-color: rgba(99, 102, 241, 0.3);">
             <div class="card-title" style="margin-bottom: 10px; color: #A5B4FC;">
                 <span>❓</span> Dynamic Question Prioritization
@@ -115,9 +130,10 @@ def render_intelligence_panel():
                 <strong>Reason:</strong> {next_question['reason']}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
-        if st.button("💬 Ask Caller This Question", key="btn_ask_caller", type="secondary", use_container_width=True):
+        if st.button("💬 Ask Caller This Question", key="btn_ask_caller", type="secondary", use_container_width=True,
+                     disabled=case_card is not None):
             # Insert AI question into timeline
             timeline = st.session_state.get("conversation_history", [])
             timeline.append({
@@ -132,7 +148,7 @@ def render_intelligence_panel():
             st.rerun()
 
     # CARD 5: AI SAFETY BOUNDARIES
-    st.markdown("""
+    render_html("""
     <div class="saas-card" style="padding: 16px; margin-bottom: 0;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>🛡️</span> AI Safety & Escalation Guardrails
@@ -143,4 +159,4 @@ def render_intelligence_panel():
         <div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
         <div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
     </div>
-    """, unsafe_allow_html=True)
+    """)

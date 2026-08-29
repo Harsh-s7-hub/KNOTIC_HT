@@ -1,4 +1,5 @@
 import streamlit as st
+from components.html import render_html
 
 def render_header(session_id: str = "SES-892401", system_status: str = "All systems operational"):
     """
@@ -36,4 +37,4 @@ def render_header(session_id: str = "SES-892401", system_status: str = "All syst
         </div>
     </div>
     """
-    st.markdown(header_html, unsafe_allow_html=True)
+    render_html(header_html)
