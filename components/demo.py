@@ -1,4 +1,3 @@
-import textwrap
 import streamlit as st
 
 DEMO_STEPS = [
@@ -430,22 +429,19 @@ def render_demo_stepper():
     curr_step = st.session_state.get("demo_step", 0)
     step_data = DEMO_STEPS[curr_step]
     
-    st.markdown(textwrap.dedent(f"""
-    <div class="demo-banner">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div class="demo-title">🎬 Hackathon Interactive Demo Simulation Mode ({curr_step + 1} / {len(DEMO_STEPS)})</div>
-                <div class="demo-step-text">{step_data['title']}</div>
-                <div style="font-size: 12px; color: #9CA3AF; margin-top: 2px;">{step_data['description']}</div>
-            </div>
-            <div style="text-align: right;">
-                <span class="badge-live" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4); color: #A5B4FC;">
-                    STEPPER ACTIVE
-                </span>
-            </div>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    banner_html = f"""<div class="demo-banner">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div>
+<div class="demo-title">🎬 Hackathon Interactive Demo Simulation Mode ({curr_step + 1} / {len(DEMO_STEPS)})</div>
+<div class="demo-step-text">{step_data['title']}</div>
+<div style="font-size: 12px; color: #9CA3AF; margin-top: 2px;">{step_data['description']}</div>
+</div>
+<div style="text-align: right;">
+<span class="badge-live" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4); color: #A5B4FC;">STEPPER ACTIVE</span>
+</div>
+</div>
+</div>"""
+    st.html(banner_html)
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:

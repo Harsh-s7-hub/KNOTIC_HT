@@ -1,4 +1,3 @@
-import textwrap
 import streamlit as st
 
 def render_intelligence_panel():
@@ -33,23 +32,20 @@ def render_intelligence_panel():
         conf_status = "Low Confidence • Escalation Recommended"
 
     # CARD 1: DETECTED INTENT
-    st.markdown(textwrap.dedent(f"""
-    <div class="saas-card" style="padding: 16px;">
-        <div class="card-title" style="margin-bottom: 10px;">
-            <span>🎯</span> Detected Intent
-        </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-            <div>
-                <div style="font-size: 14px; font-weight: 700; color: #FFFFFF;">{intent['name']}</div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">NLU Model: IndicBERT-v2</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: #6366F1;">{intent['confidence']}%</div>
-                <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Confidence</div>
-            </div>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    card1_html = f"""<div class="saas-card" style="padding: 16px;">
+<div class="card-title" style="margin-bottom: 10px;"><span>🎯</span> Detected Intent</div>
+<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+<div>
+<div style="font-size: 14px; font-weight: 700; color: #FFFFFF;">{intent['name']}</div>
+<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">NLU Model: IndicBERT-v2</div>
+</div>
+<div style="text-align: right;">
+<div style="font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: #6366F1;">{intent['confidence']}%</div>
+<div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Confidence</div>
+</div>
+</div>
+</div>"""
+    st.html(card1_html)
 
     # CARD 2: EXTRACTED STRUCTURED ENTITIES
     entity_rows_html = ""
@@ -62,61 +58,46 @@ def render_intelligence_panel():
         else:
             badge_html = '<span class="status-badge status-badge-uncertain">? Uncertain</span>'
 
-        entity_rows_html += f"""
-        <div class="entity-row">
-            <span class="entity-key">{ent['key']}</span>
-            <div class="entity-val">
-                <span>{ent['val']}</span>
-                {badge_html}
-            </div>
-        </div>
-        """
+        entity_rows_html += f"""<div class="entity-row">
+<span class="entity-key">{ent['key']}</span>
+<div class="entity-val">
+<span>{ent['val']}</span>
+{badge_html}
+</div>
+</div>"""
 
-    st.markdown(textwrap.dedent(f"""
-    <div class="saas-card" style="padding: 16px;">
-        <div class="card-title" style="margin-bottom: 12px;">
-            <span>🏷️</span> Extracted Information
-        </div>
-        <div class="entity-grid">
-            {entity_rows_html}
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    card2_html = f"""<div class="saas-card" style="padding: 16px;">
+<div class="card-title" style="margin-bottom: 12px;"><span>🏷️</span> Extracted Information</div>
+<div class="entity-grid">
+{entity_rows_html}
+</div>
+</div>"""
+    st.html(card2_html)
 
     # CARD 3: OVERALL CONFIDENCE METER
-    st.markdown(textwrap.dedent(f"""
-    <div class="saas-card" style="padding: 16px;">
-        <div class="card-title" style="margin-bottom: 10px;">
-            <span>📊</span> Overall Confidence Score
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-            <span style="font-size: 22px; font-weight: 800; font-family: var(--font-mono); color: {conf_color};">{overall_confidence}%</span>
-            <span style="font-size: 11px; font-weight: 700; color: {conf_color}; text-transform: uppercase;">{conf_status}</span>
-        </div>
-        <div class="confidence-meter-bg">
-            <div class="confidence-meter-fill" style="width: {overall_confidence}%; background: {conf_color};"></div>
-        </div>
-        <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; margin-top: 8px;">
-            💡 <em>"{confidence_explanation}"</em>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    card3_html = f"""<div class="saas-card" style="padding: 16px;">
+<div class="card-title" style="margin-bottom: 10px;"><span>📊</span> Overall Confidence Score</div>
+<div style="display: flex; justify-content: space-between; align-items: flex-end;">
+<span style="font-size: 22px; font-weight: 800; font-family: var(--font-mono); color: {conf_color};">{overall_confidence}%</span>
+<span style="font-size: 11px; font-weight: 700; color: {conf_color}; text-transform: uppercase;">{conf_status}</span>
+</div>
+<div class="confidence-meter-bg">
+<div class="confidence-meter-fill" style="width: {overall_confidence}%; background: {conf_color};"></div>
+</div>
+<div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; margin-top: 8px;">
+💡 <em>"{confidence_explanation}"</em>
+</div>
+</div>"""
+    st.html(card3_html)
 
     # CARD 4: NEXT BEST QUESTION
     if next_question:
-        st.markdown(textwrap.dedent(f"""
-        <div class="saas-card" style="padding: 16px; border-color: rgba(99, 102, 241, 0.3);">
-            <div class="card-title" style="margin-bottom: 10px; color: #A5B4FC;">
-                <span>❓</span> Dynamic Question Prioritization
-            </div>
-            <div style="font-size: 13px; font-weight: 600; color: #FFFFFF; line-height: 1.4;">
-                "{next_question['text']}"
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
-                <strong>Reason:</strong> {next_question['reason']}
-            </div>
-        </div>
-        """).strip(), unsafe_allow_html=True)
+        card4_html = f"""<div class="saas-card" style="padding: 16px; border-color: rgba(99, 102, 241, 0.3);">
+<div class="card-title" style="margin-bottom: 10px; color: #A5B4FC;"><span>❓</span> Dynamic Question Prioritization</div>
+<div style="font-size: 13px; font-weight: 600; color: #FFFFFF; line-height: 1.4;">"{next_question['text']}"</div>
+<div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;"><strong>Reason:</strong> {next_question['reason']}</div>
+</div>"""
+        st.html(card4_html)
 
         if st.button("💬 Ask Caller This Question", key="btn_ask_caller", type="secondary", use_container_width=True):
             # Insert AI question into timeline
@@ -133,15 +114,12 @@ def render_intelligence_panel():
             st.rerun()
 
     # CARD 5: AI SAFETY BOUNDARIES
-    st.markdown(textwrap.dedent("""
-    <div class="saas-card" style="padding: 16px; margin-bottom: 0;">
-        <div class="card-title" style="margin-bottom: 10px;">
-            <span>🛡️</span> AI Safety & Escalation Guardrails
-        </div>
-        <div class="safety-item"><span class="safety-check">✓</span> Verified structured information only</div>
-        <div class="safety-item"><span class="safety-check">✓</span> Strict domain boundary enforcement</div>
-        <div class="safety-item"><span class="safety-check">✓</span> Automatic escalation on low confidence</div>
-        <div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
-        <div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    card5_html = """<div class="saas-card" style="padding: 16px; margin-bottom: 0;">
+<div class="card-title" style="margin-bottom: 10px;"><span>🛡️</span> AI Safety & Escalation Guardrails</div>
+<div class="safety-item"><span class="safety-check">✓</span> Verified structured information only</div>
+<div class="safety-item"><span class="safety-check">✓</span> Strict domain boundary enforcement</div>
+<div class="safety-item"><span class="safety-check">✓</span> Automatic escalation on low confidence</div>
+<div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
+<div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
+</div>"""
+    st.html(card5_html)

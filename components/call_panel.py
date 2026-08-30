@@ -1,4 +1,3 @@
-import textwrap
 import streamlit as st
 
 def render_call_panel():
@@ -33,56 +32,51 @@ def render_call_panel():
 
     status_badge_color = "#EF4444" if call_status == "LIVE CALL" else "#10B981"
 
-    st.markdown(textwrap.dedent(f"""
-    <div class="saas-card">
-        <div class="card-title-bar">
-            <span class="card-title">
-                <span style="color: {status_badge_color};">●</span> {call_status.replace('_', ' ')}
-            </span>
-            <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">
-                ⏱️ {call_duration}
-            </span>
-        </div>
+    connected_agent_html = f'<div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #10B981; font-weight: 600;">🎧 Connected Agent: {assigned_human}</div>' if is_human_connected else ''
 
-        <div style="background: rgba(0, 0, 0, 0.25); border-radius: 12px; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Caller ID</div>
-                    <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">Unknown Caller (+91 98765-XXXXX)</div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Mode</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #C084FC; margin-top: 2px;">Hindi + English</div>
-                </div>
-            </div>
-            {f'<div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #10B981; font-weight: 600;">🎧 Connected Agent: {assigned_human}</div>' if is_human_connected else ''}
-        </div>
-
-        <!-- VOICE WAVEFORM VISUALIZATION -->
-        <div class="waveform-container {wave_class}">
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-        </div>
-
-        <div class="speech-status-pill">
-            <span>{speaker_icon}</span>
-            <span style="color: {status_color};">{speaker_state}</span>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    call_card_html = f"""<div class="saas-card">
+<div class="card-title-bar">
+<span class="card-title">
+<span style="color: {status_badge_color};">●</span> {call_status.replace('_', ' ')}
+</span>
+<span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">⏱️ {call_duration}</span>
+</div>
+<div style="background: rgba(0, 0, 0, 0.25); border-radius: 12px; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 14px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div>
+<div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Caller ID</div>
+<div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">Unknown Caller (+91 98765-XXXXX)</div>
+</div>
+<div style="text-align: right;">
+<div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Mode</div>
+<div style="font-size: 12px; font-weight: 700; color: #C084FC; margin-top: 2px;">Hindi + English</div>
+</div>
+</div>
+{connected_agent_html}
+</div>
+<div class="waveform-container {wave_class}">
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+<div class="wave-bar"></div>
+</div>
+<div class="speech-status-pill">
+<span>{speaker_icon}</span>
+<span style="color: {status_color};">{speaker_state}</span>
+</div>
+</div>"""
+    st.html(call_card_html)
 
     # CALL CONTROL BUTTONS
     c1, c2 = st.columns(2)
@@ -107,51 +101,45 @@ def render_call_panel():
         st.success("✓ Call Handed Off to Support Specialist", icon="🎧")
 
     # CARD: AUDIO QUALITY & NOISE RESILIENCE
-    st.markdown(textwrap.dedent("""
-    <div class="saas-card" style="margin-top: 14px; padding: 16px;">
-        <div class="card-title" style="margin-bottom: 12px;">
-            <span>🔊</span> Audio Quality & Noise Resilience
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
-            <div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
-                <div style="color: var(--text-muted); font-size: 10px;">SIGNAL STRENGTH</div>
-                <div style="font-weight: 700; color: #10B981; margin-top: 2px;">Good (-68 dBm)</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
-                <div style="color: var(--text-muted); font-size: 10px;">BG NOISE</div>
-                <div style="font-weight: 700; color: #F59E0B; margin-top: 2px;">Moderate (Street)</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
-                <div style="color: var(--text-muted); font-size: 10px;">SPEECH CLARITY</div>
-                <div style="font-weight: 700; color: #60A5FA; margin-top: 2px;">82%</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
-                <div style="color: var(--text-muted); font-size: 10px;">NOISE FILTER</div>
-                <div style="font-weight: 700; color: #10B981; margin-top: 2px;">Active (DeepFilter)</div>
-            </div>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    audio_card_html = """<div class="saas-card" style="margin-top: 14px; padding: 16px;">
+<div class="card-title" style="margin-bottom: 12px;"><span>🔊</span> Audio Quality & Noise Resilience</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+<div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
+<div style="color: var(--text-muted); font-size: 10px;">SIGNAL STRENGTH</div>
+<div style="font-weight: 700; color: #10B981; margin-top: 2px;">Good (-68 dBm)</div>
+</div>
+<div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
+<div style="color: var(--text-muted); font-size: 10px;">BG NOISE</div>
+<div style="font-weight: 700; color: #F59E0B; margin-top: 2px;">Moderate (Street)</div>
+</div>
+<div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
+<div style="color: var(--text-muted); font-size: 10px;">SPEECH CLARITY</div>
+<div style="font-weight: 700; color: #60A5FA; margin-top: 2px;">82%</div>
+</div>
+<div style="background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;">
+<div style="color: var(--text-muted); font-size: 10px;">NOISE FILTER</div>
+<div style="font-weight: 700; color: #10B981; margin-top: 2px;">Active (DeepFilter)</div>
+</div>
+</div>
+</div>"""
+    st.html(audio_card_html)
 
     # CARD: LANGUAGE DETECTION BREAKDOWN
     hi_pct = st.session_state.get("lang_hi", 62)
     en_pct = st.session_state.get("lang_en", 38)
-    st.markdown(textwrap.dedent(f"""
-    <div class="saas-card" style="padding: 16px;">
-        <div class="card-title" style="margin-bottom: 12px;">
-            <span>🌐</span> Real-Time Language Detection
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-            <span>Hindi (<strong style="color: #FBBF24;">{hi_pct}%</strong>)</span>
-            <span>English (<strong style="color: #60A5FA;">{en_pct}%</strong>)</span>
-        </div>
-        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; display: flex;">
-            <div style="width: {hi_pct}%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
-            <div style="width: {en_pct}%; background: linear-gradient(90deg, #3B82F6, #60A5FA);"></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px;">
-            <span style="color: var(--text-muted);">Mode Detected:</span>
-            <span style="background: rgba(139, 92, 246, 0.2); color: #C084FC; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Code-Switched (Hinglish)</span>
-        </div>
-    </div>
-    """).strip(), unsafe_allow_html=True)
+    lang_card_html = f"""<div class="saas-card" style="padding: 16px;">
+<div class="card-title" style="margin-bottom: 12px;"><span>🌐</span> Real-Time Language Detection</div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+<span>Hindi (<strong style="color: #FBBF24;">{hi_pct}%</strong>)</span>
+<span>English (<strong style="color: #60A5FA;">{en_pct}%</strong>)</span>
+</div>
+<div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; display: flex;">
+<div style="width: {hi_pct}%; background: linear-gradient(90deg, #F59E0B, #FBBF24);"></div>
+<div style="width: {en_pct}%; background: linear-gradient(90deg, #3B82F6, #60A5FA);"></div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px;">
+<span style="color: var(--text-muted);">Mode Detected:</span>
+<span style="background: rgba(139, 92, 246, 0.2); color: #C084FC; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Code-Switched (Hinglish)</span>
+</div>
+</div>"""
+    st.html(lang_card_html)
