@@ -1,10 +1,11 @@
+import textwrap
 import streamlit as st
 
 def render_header(session_id: str = "SES-892401", system_status: str = "All systems operational"):
     """
     Renders the custom top navigation header bar.
     """
-    header_html = f"""
+    header_html = textwrap.dedent(f"""
     <div class="app-header">
         <div class="header-brand">
             <div class="brand-icon">⚡</div>
@@ -35,5 +36,5 @@ def render_header(session_id: str = "SES-892401", system_status: str = "All syst
             </div>
         </div>
     </div>
-    """
+    """).strip()
     st.markdown(header_html, unsafe_allow_html=True)

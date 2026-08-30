@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 def render_call_panel():
@@ -32,7 +33,7 @@ def render_call_panel():
 
     status_badge_color = "#EF4444" if call_status == "LIVE CALL" else "#10B981"
 
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card">
         <div class="card-title-bar">
             <span class="card-title">
@@ -81,7 +82,7 @@ def render_call_panel():
             <span style="color: {status_color};">{speaker_state}</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     # CALL CONTROL BUTTONS
     c1, c2 = st.columns(2)
@@ -106,7 +107,7 @@ def render_call_panel():
         st.success("✓ Call Handed Off to Support Specialist", icon="🎧")
 
     # CARD: AUDIO QUALITY & NOISE RESILIENCE
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="saas-card" style="margin-top: 14px; padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🔊</span> Audio Quality & Noise Resilience
@@ -130,12 +131,12 @@ def render_call_panel():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     # CARD: LANGUAGE DETECTION BREAKDOWN
     hi_pct = st.session_state.get("lang_hi", 62)
     en_pct = st.session_state.get("lang_en", 38)
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🌐</span> Real-Time Language Detection
@@ -153,4 +154,4 @@ def render_call_panel():
             <span style="background: rgba(139, 92, 246, 0.2); color: #C084FC; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Code-Switched (Hinglish)</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)

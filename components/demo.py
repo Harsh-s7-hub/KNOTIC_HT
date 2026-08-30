@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 DEMO_STEPS = [
@@ -429,7 +430,7 @@ def render_demo_stepper():
     curr_step = st.session_state.get("demo_step", 0)
     step_data = DEMO_STEPS[curr_step]
     
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="demo-banner">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -444,7 +445,7 @@ def render_demo_stepper():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:

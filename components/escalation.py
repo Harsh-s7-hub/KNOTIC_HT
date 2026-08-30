@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 def render_escalation_modal():
@@ -8,7 +9,7 @@ def render_escalation_modal():
         return
 
     # Use Streamlit dialog or custom expander overlay block
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div style="background: rgba(17, 24, 39, 0.95); border: 2px solid rgba(239, 68, 68, 0.5); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.25);">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -75,7 +76,7 @@ def render_escalation_modal():
             <button id="close_btn" style="display:none;"></button>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 1])
     with col1:

@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 def render_intelligence_panel():
@@ -32,7 +33,7 @@ def render_intelligence_panel():
         conf_status = "Low Confidence • Escalation Recommended"
 
     # CARD 1: DETECTED INTENT
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>🎯</span> Detected Intent
@@ -48,7 +49,7 @@ def render_intelligence_panel():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     # CARD 2: EXTRACTED STRUCTURED ENTITIES
     entity_rows_html = ""
@@ -71,7 +72,7 @@ def render_intelligence_panel():
         </div>
         """
 
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 12px;">
             <span>🏷️</span> Extracted Information
@@ -80,10 +81,10 @@ def render_intelligence_panel():
             {entity_rows_html}
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     # CARD 3: OVERALL CONFIDENCE METER
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card" style="padding: 16px;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>📊</span> Overall Confidence Score
@@ -99,11 +100,11 @@ def render_intelligence_panel():
             💡 <em>"{confidence_explanation}"</em>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     # CARD 4: NEXT BEST QUESTION
     if next_question:
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
         <div class="saas-card" style="padding: 16px; border-color: rgba(99, 102, 241, 0.3);">
             <div class="card-title" style="margin-bottom: 10px; color: #A5B4FC;">
                 <span>❓</span> Dynamic Question Prioritization
@@ -115,7 +116,7 @@ def render_intelligence_panel():
                 <strong>Reason:</strong> {next_question['reason']}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """).strip(), unsafe_allow_html=True)
 
         if st.button("💬 Ask Caller This Question", key="btn_ask_caller", type="secondary", use_container_width=True):
             # Insert AI question into timeline
@@ -132,7 +133,7 @@ def render_intelligence_panel():
             st.rerun()
 
     # CARD 5: AI SAFETY BOUNDARIES
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="saas-card" style="padding: 16px; margin-bottom: 0;">
         <div class="card-title" style="margin-bottom: 10px;">
             <span>🛡️</span> AI Safety & Escalation Guardrails
@@ -143,4 +144,4 @@ def render_intelligence_panel():
         <div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
         <div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)

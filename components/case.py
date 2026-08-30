@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 def render_case_section():
@@ -8,7 +9,7 @@ def render_case_section():
     ticket_status = st.session_state.get("ticket_status", "Escalated")
     assigned_to = st.session_state.get("assigned_human", "Support Specialist")
     
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
     <div class="saas-card" style="padding: 16px; border-left: 4px solid #8B5CF6;">
         <div class="card-title-bar">
             <span class="card-title">
@@ -46,7 +47,7 @@ def render_case_section():
             <span>Created: <strong>Just now</strong></span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """).strip(), unsafe_allow_html=True)
 
     if st.button("📋 View Full Case File", key="btn_view_case", type="secondary", use_container_width=True):
         st.session_state["show_case_modal"] = not st.session_state.get("show_case_modal", False)
@@ -54,7 +55,7 @@ def render_case_section():
 
     # FULL CASE MODAL OVERLAY
     if st.session_state.get("show_case_modal", False):
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
         <div style="background: rgba(17, 24, 39, 0.95); border: 1px solid var(--accent-indigo); border-radius: 16px; padding: 20px; margin-top: 10px; margin-bottom: 16px;">
             <div style="font-size: 16px; font-weight: 800; color: #FFFFFF; margin-bottom: 12px;">
                 📂 Full Case Ticket Record #{ticket_id}
@@ -67,4 +68,4 @@ def render_case_section():
                 <div><strong>Context Transfer Payload:</strong> Structured Entities JSON generated & saved to CRM.</div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """).strip(), unsafe_allow_html=True)
