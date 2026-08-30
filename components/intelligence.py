@@ -3,6 +3,7 @@ import streamlit as st
 def render_intelligence_panel():
     """
     Renders the Right Panel — AI Intelligence cards (Intent, Extracted Entities, Confidence Meter, Next Question, AI Safety).
+    Combines all cards into a single HTML stream to prevent iframe height clipping.
     """
     intent = st.session_state.get("intent", {"name": "Payment / Order Issue", "confidence": 94})
     entities = st.session_state.get("entities", [
@@ -45,7 +46,6 @@ def render_intelligence_panel():
 </div>
 </div>
 </div>"""
-    st.html(card1_html)
 
     # CARD 2: EXTRACTED STRUCTURED ENTITIES
     entity_rows_html = ""
@@ -72,7 +72,6 @@ def render_intelligence_panel():
 {entity_rows_html}
 </div>
 </div>"""
-    st.html(card2_html)
 
     # CARD 3: OVERALL CONFIDENCE METER
     card3_html = f"""<div class="saas-card" style="padding: 16px;">
@@ -88,19 +87,31 @@ def render_intelligence_panel():
 💡 <em>"{confidence_explanation}"</em>
 </div>
 </div>"""
-    st.html(card3_html)
 
     # CARD 4: NEXT BEST QUESTION
+    card4_html = ""
     if next_question:
         card4_html = f"""<div class="saas-card" style="padding: 16px; border-color: rgba(99, 102, 241, 0.3);">
 <div class="card-title" style="margin-bottom: 10px; color: #A5B4FC;"><span>❓</span> Dynamic Question Prioritization</div>
 <div style="font-size: 13px; font-weight: 600; color: #FFFFFF; line-height: 1.4;">"{next_question['text']}"</div>
 <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;"><strong>Reason:</strong> {next_question['reason']}</div>
 </div>"""
-        st.html(card4_html)
 
+    # CARD 5: AI SAFETY BOUNDARIES
+    card5_html = """<div class="saas-card" style="padding: 16px; margin-bottom: 0;">
+<div class="card-title" style="margin-bottom: 10px;"><span>🛡️</span> AI Safety & Escalation Guardrails</div>
+<div class="safety-item"><span class="safety-check">✓</span> Verified structured information only</div>
+<div class="safety-item"><span class="safety-check">✓</span> Strict domain boundary enforcement</div>
+<div class="safety-item"><span class="safety-check">✓</span> Automatic escalation on low confidence</div>
+<div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
+<div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
+</div>"""
+
+    full_intel_html = card1_html + card2_html + card3_html + card4_html + card5_html
+    st.html(full_intel_html)
+
+    if next_question:
         if st.button("💬 Ask Caller This Question", key="btn_ask_caller", type="secondary", use_container_width=True):
-            # Insert AI question into timeline
             timeline = st.session_state.get("conversation_history", [])
             timeline.append({
                 "type": "message",
@@ -112,14 +123,3 @@ def render_intelligence_panel():
             st.session_state["conversation_history"] = timeline
             st.session_state["speaker_state"] = "AI is responding..."
             st.rerun()
-
-    # CARD 5: AI SAFETY BOUNDARIES
-    card5_html = """<div class="saas-card" style="padding: 16px; margin-bottom: 0;">
-<div class="card-title" style="margin-bottom: 10px;"><span>🛡️</span> AI Safety & Escalation Guardrails</div>
-<div class="safety-item"><span class="safety-check">✓</span> Verified structured information only</div>
-<div class="safety-item"><span class="safety-check">✓</span> Strict domain boundary enforcement</div>
-<div class="safety-item"><span class="safety-check">✓</span> Automatic escalation on low confidence</div>
-<div class="safety-item"><span class="safety-check">✓</span> Zero context loss handoff protocol</div>
-<div class="safety-item"><span class="safety-check">✓</span> Human supervisor in the loop</div>
-</div>"""
-    st.html(card5_html)

@@ -1,5 +1,14 @@
 import os
+import sys
+import time
+import logging
+import warnings
 import streamlit as st
+
+# Suppress deprecation and background noise warnings
+warnings.filterwarnings("ignore")
+logging.getLogger("asyncio").setLevel(logging.CRITICAL)
+logging.getLogger("tornado").setLevel(logging.CRITICAL)
 
 # Import component modules
 from components.header import render_header
@@ -8,7 +17,7 @@ from components.conversation import render_conversation_panel
 from components.intelligence import render_intelligence_panel
 from components.escalation import render_escalation_modal
 from components.case import render_case_section
-from components.demo import render_demo_stepper, apply_demo_step
+from components.demo import render_demo_stepper, apply_demo_step, DEMO_STEPS
 
 # Configure Streamlit Page
 st.set_page_config(
@@ -27,8 +36,8 @@ def load_css(css_file_path):
 css_path = os.path.join(os.path.dirname(__file__), "styles", "main.css")
 load_css(css_path)
 
-# Initialize Session State
-if "demo_step" not in st.session_state:
+# Enforce complete session state synchronization
+if "demo_step" not in st.session_state or "call_duration" not in st.session_state:
     apply_demo_step(0)
 
 # 1. TOP NAVIGATION HEADER
@@ -59,3 +68,13 @@ with col_right:
     render_intelligence_panel()
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     render_case_section()
+
+# 5. AUTO-PLAY DEMO SIMULATION LOOP
+if st.session_state.get("is_playing", False):
+    curr = st.session_state.get("demo_step", 0)
+    if curr < len(DEMO_STEPS) - 1:
+        time.sleep(2.5)
+        apply_demo_step(curr + 1)
+        st.rerun()
+    else:
+        st.session_state["is_playing"] = False

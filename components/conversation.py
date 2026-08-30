@@ -3,59 +3,53 @@ import streamlit as st
 def render_conversation_panel():
     """
     Renders the Center Panel — Live Conversation timeline with chat bubbles and pipeline events.
+    Combines all message nodes into one full HTML container for seamless DOM rendering.
     """
     timeline = st.session_state.get("conversation_history", [])
     
-    st.html("""<div class="saas-card" style="height: 100%; min-height: 680px; display: flex; flex-direction: column;">
-<div class="card-title-bar">
-<span class="card-title"><span>💬</span> Live Conversation & Pipeline Timeline</span>
-<span class="badge-live" style="font-size: 10px; padding: 2px 8px;">REAL-TIME ASR & NLU</span>
-</div>
-<div class="conversation-timeline">""")
-
+    items_html = ""
     if not timeline:
-        st.html("""<div style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+        items_html = """<div style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
 <div style="font-size: 32px; margin-bottom: 8px;">🎙️</div>
 <div>Waiting for incoming speech...</div>
 <div style="font-size: 12px; margin-top: 4px;">Click "Start Demo" or step forward to simulate conversation.</div>
-</div>""")
-
-    for item in timeline:
-        item_type = item.get("type", "message")
-        
-        if item_type == "event":
-            event_text = item.get("text", "")
-            event_icon = item.get("icon", "⚡")
-            event_time = item.get("time", "")
+</div>"""
+    else:
+        for item in timeline:
+            item_type = item.get("type", "message")
             
-            st.html(f"""<div class="pipeline-node">
+            if item_type == "event":
+                event_text = item.get("text", "")
+                event_icon = item.get("icon", "⚡")
+                event_time = item.get("time", "")
+                
+                items_html += f"""<div class="pipeline-node">
 <span class="pipeline-dot"></span>
 <span>{event_icon}</span>
 <span style="flex-grow: 1;">{event_text}</span>
 <span style="font-size: 10px; opacity: 0.7;">{event_time}</span>
-</div>""")
-            
-        elif item_type == "interruption":
-            st.html("""<div style="align-self: center; background: rgba(239, 68, 68, 0.15); border: 1px dashed rgba(239, 68, 68, 0.4); color: #FCA5A5; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin: 4px 0;">
+</div>"""
+                
+            elif item_type == "interruption":
+                items_html += """<div style="align-self: center; background: rgba(239, 68, 68, 0.15); border: 1px dashed rgba(239, 68, 68, 0.4); color: #FCA5A5; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin: 4px 0;">
 ⚠️ Caller Interrupted • Latency Compensated (80ms)
-</div>""")
-            
-        elif item_type == "message":
-            role = item.get("role", "caller")
-            text = item.get("text", "")
-            time_str = item.get("time", "10:42 AM")
-            lang = item.get("lang", "HI")
-            
-            # Select badge class
-            if lang == "HI":
-                lang_badge = '<span class="lang-badge lang-badge-hi">HI</span>'
-            elif lang == "EN":
-                lang_badge = '<span class="lang-badge lang-badge-en">EN</span>'
-            else:
-                lang_badge = '<span class="lang-badge lang-badge-cs">HI+EN</span>'
+</div>"""
+                
+            elif item_type == "message":
+                role = item.get("role", "caller")
+                text = item.get("text", "")
+                time_str = item.get("time", "10:42 AM")
+                lang = item.get("lang", "HI")
+                
+                if lang == "HI":
+                    lang_badge = '<span class="lang-badge lang-badge-hi">HI</span>'
+                elif lang == "EN":
+                    lang_badge = '<span class="lang-badge lang-badge-en">EN</span>'
+                else:
+                    lang_badge = '<span class="lang-badge lang-badge-cs">HI+EN</span>'
 
-            if role == "caller":
-                st.html(f"""<div class="chat-bubble-caller">
+                if role == "caller":
+                    items_html += f"""<div class="chat-bubble-caller">
 <div class="bubble-meta">
 <span class="bubble-author" style="color: #60A5FA;">👤 CALLER</span>
 <div style="display: flex; align-items: center; gap: 6px;">
@@ -64,10 +58,10 @@ def render_conversation_panel():
 </div>
 </div>
 <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
-</div>""")
+</div>"""
 
-            elif role == "ai":
-                st.html(f"""<div class="chat-bubble-ai">
+                elif role == "ai":
+                    items_html += f"""<div class="chat-bubble-ai">
 <div class="bubble-meta">
 <span class="bubble-author" style="color: #A5B4FC;">🤖 AI AGENT</span>
 <div style="display: flex; align-items: center; gap: 6px;">
@@ -76,15 +70,25 @@ def render_conversation_panel():
 </div>
 </div>
 <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
-</div>""")
-                
-            elif role == "human":
-                st.html(f"""<div class="chat-bubble-ai" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 95, 70, 0.3) 100%); border-color: rgba(16, 185, 129, 0.4);">
+</div>"""
+                    
+                elif role == "human":
+                    items_html += f"""<div class="chat-bubble-ai" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 95, 70, 0.3) 100%); border-color: rgba(16, 185, 129, 0.4);">
 <div class="bubble-meta">
 <span class="bubble-author" style="color: #6EE7B7;">🎧 HUMAN AGENT (Support Specialist)</span>
 <span>{time_str}</span>
 </div>
 <div style="font-size: 13.5px; line-height: 1.45;">{text}</div>
-</div>""")
+</div>"""
 
-    st.html("""</div></div>""")
+    full_card_html = f"""<div class="saas-card" style="height: 100%; min-height: 680px; display: flex; flex-direction: column;">
+<div class="card-title-bar">
+<span class="card-title"><span>💬</span> Live Conversation & Pipeline Timeline</span>
+<span class="badge-live" style="font-size: 10px; padding: 2px 8px;">REAL-TIME ASR & NLU</span>
+</div>
+<div class="conversation-timeline">
+{items_html}
+</div>
+</div>"""
+
+    st.html(full_card_html)
